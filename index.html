@@ -202,7 +202,7 @@ async function fetchMenu() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await fetch(https://script.google.com/macros/s/AKfycbw2KLZ8xLcc_N0VYFER4B6gIWgCvJKa6CLx1gYlwIa71tmbg7uwBMbMICiGFQJ5OFnhPw/exec, { signal: controller.signal, cache: 'no-store' });
+    const res = await fetch("https://script.google.com/macros/s/AKfycbw2KLZ8xLcc_N0VYFER4B6gIWgCvJKa6CLx1gYlwIa71tmbg7uwBMbMICiGFQJ5OFnhPw/exec", { signal: controller.signal, cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     if (json.status !== 'success') throw new Error(json.message || 'Error del servidor');
