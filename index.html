@@ -67,6 +67,7 @@ tailwind.config = {
   button { touch-action: manipulation; }
   .day-card { border-left: 4px solid transparent; transition: all 0.3s ease; }
   .day-card.active { border-left-color: #2b694d; background-color: #f0fdf4; }
+  .day-card.sin-menu { border-left-color: #c1c8c2; background-color: #f9f2ec; opacity: 0.75; }
   .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
   @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
   .skeleton-select { height: 40px; width: 100%; margin-bottom: 8px; }
@@ -84,7 +85,7 @@ tailwind.config = {
 <main class="flex-grow w-full max-w-6xl mx-auto px-4 py-8">
   <section class="mb-8 text-center md:text-left">
     <h1 class="font-headline-md text-2xl md:text-4xl font-bold text-primary mb-2">Arma tu Menú Semanal</h1>
-    <p class="text-on-surface-variant max-w-xl">Elige tu almuerzo y cena para cada día. Puedes repetir platos. Los días que no completes no se incluirán.</p>
+    <p class="text-on-surface-variant max-w-xl">Cada día tiene su propio menú. Elige tu almuerzo y cena para los días que quieras pedir.</p>
   </section>
 
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -171,38 +172,38 @@ tailwind.config = {
 <script>
 // ============================================================
 const NUMERO_WHATSAPP = "50766646198";
-const URL_API = "https://script.google.com/macros/s/AKfycbw2KLZ8xLcc_N0VYFER4B6gIWgCvJKa6CLx1gYlwIa71tmbg7uwBMbMICiGFQJ5OFnhPw/exec";
+const URL_API = "https://script.google.com/macros/s/AKfycbw56rj_zl0jI5IquBxwQ26dbPZSVd5OoGJdYeuGms0kFndbI-uK_kg5hBtk3MuDBBiXWA/exec";
 const CACHE_DURATION = 30 * 1000; // 30 segundos
 const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-let menu = { almuerzos: [], cenas: [] };
+let menu = {};
 let selecciones = {};
-let alergia = null; // 'si' | 'no' | null
+let alergia = null;
 
 const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 const esc = s => String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
 function guardarCache(data) {
-  try { localStorage.setItem('snacktime_menu_v2', JSON.stringify({ timestamp: Date.now(), data })); } catch(e){}
+  try { localStorage.setItem('snacktime_menu_v3', JSON.stringify({ timestamp: Date.now(), data })); } catch(e){}
 }
 function obtenerCache() {
   try {
-    const raw = localStorage.getItem('snacktime_menu_v2');
+    const raw = localStorage.getItem('snacktime_menu_v3');
     if (!raw) return null;
     const c = JSON.parse(raw);
-    if (Date.now() - c.timestamp > CACHE_DURATION) { localStorage.removeItem('snacktime_menu_v2'); return null; }
+    if (Date.now() - c.timestamp > CACHE_DURATION) { localStorage.removeItem('snacktime_menu_v3'); return null; }
     return c.data;
   } catch(e) { return null; }
 }
 
 async function fetchMenu() {
   const cache = obtenerCache();
-  if (cache && cache.almuerzos && cache.cenas) return cache;
+  if (cache && typeof cache === 'object') return cache;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await fetch("https://script.google.com/macros/s/AKfycbw56rj_zl0jI5IquBxwQ26dbPZSVd5OoGJdYeuGms0kFndbI-uK_kg5hBtk3MuDBBiXWA/exec", { signal: controller.signal, cache: 'no-store' });
+    const res = await fetch(URL_API, { signal: controller.signal, cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     if (json.status !== 'success') throw new Error(json.message || 'Error del servidor');
@@ -217,7 +218,8 @@ async function cargarDatos() {
   const container = document.getElementById('dias-container');
   try {
     menu = await fetchMenu();
-    if (!menu.almuerzos.length && !menu.cenas.length) {
+    const tieneOpciones = Object.values(menu).some(d => (d.almuerzos?.length || 0) + (d.cenas?.length || 0) > 0);
+    if (!tieneOpciones) {
       container.innerHTML = '<p class="text-center text-red-600 p-4">El menú está vacío. Contacta a Snacktime.</p>';
       return;
     }
@@ -237,14 +239,31 @@ function inicializarFormulario() {
   let html = '';
   DIAS.forEach(dia => {
     const diaId = norm(dia);
+    const diaMenu = menu[diaId] || { almuerzos: [], cenas: [] };
     selecciones[diaId] = { almuerzo: '', cena: '' };
 
-    const optsAlm = menu.almuerzos.map(p =>
+    const sinAlmuerzo = !diaMenu.almuerzos || diaMenu.almuerzos.length === 0;
+    const sinCena = !diaMenu.cenas || diaMenu.cenas.length === 0;
+    const sinMenu = sinAlmuerzo && sinCena;
+
+    const optsAlm = (diaMenu.almuerzos || []).map(p =>
       `<option value="${esc(p.nombre)}">${esc(p.nombre)}${p.descripcion ? ' — ' + esc(p.descripcion) : ''}</option>`
     ).join('');
-    const optsCen = menu.cenas.map(p =>
+    const optsCen = (diaMenu.cenas || []).map(p =>
       `<option value="${esc(p.nombre)}">${esc(p.nombre)}${p.descripcion ? ' — ' + esc(p.descripcion) : ''}</option>`
     ).join('');
+
+    if (sinMenu) {
+      html += `
+      <div class="day-card sin-menu rounded-xl border border-outline-variant/30 p-4" id="dia-${diaId}">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="font-bold text-primary text-lg">${dia}</span>
+          <span class="text-xs bg-surface-container-highest text-on-surface-variant px-2 py-1 rounded-full">Sin menú disponible</span>
+        </div>
+        <p class="text-sm text-on-surface-variant italic">No hay opciones para este día.</p>
+      </div>`;
+      return;
+    }
 
     html += `
     <div class="day-card rounded-xl border border-outline-variant/30 p-4 active" id="dia-${diaId}">
@@ -254,27 +273,27 @@ function inicializarFormulario() {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div class="bg-surface-container-low rounded-lg p-3 border border-outline-variant/20">
           <label class="text-xs font-bold text-secondary uppercase tracking-wider block mb-2">🍽️ Almuerzo</label>
-          <select class="w-full px-3 py-2 text-sm rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white"
-                  data-dia="${diaId}" data-comida="almuerzo">
-            <option value="">— Seleccionar —</option>
+          <select class="w-full px-3 py-2 text-sm rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  data-dia="${diaId}" data-comida="almuerzo" ${sinAlmuerzo ? 'disabled' : ''}>
+            <option value="">${sinAlmuerzo ? '— No disponible —' : '— Seleccionar —'}</option>
             ${optsAlm}
           </select>
         </div>
         <div class="bg-surface-container-low rounded-lg p-3 border border-outline-variant/20">
           <label class="text-xs font-bold text-secondary uppercase tracking-wider block mb-2">🌙 Cena</label>
-          <select class="w-full px-3 py-2 text-sm rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white"
-                  data-dia="${diaId}" data-comida="cena">
-            <option value="">— Seleccionar —</option>
+          <select class="w-full px-3 py-2 text-sm rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  data-dia="${diaId}" data-comida="cena" ${sinCena ? 'disabled' : ''}>
+            <option value="">${sinCena ? '— No disponible —' : '— Seleccionar —'}</option>
             ${optsCen}
           </select>
         </div>
       </div>
     </div>`;
   });
+
   container.innerHTML = html;
 
-  // Event delegation (evita inline onchange)
-  container.querySelectorAll('select').forEach(sel => {
+  container.querySelectorAll('select:not([disabled])').forEach(sel => {
     sel.addEventListener('change', e => {
       const { dia, comida } = e.target.dataset;
       selecciones[dia][comida] = e.target.value;
@@ -293,9 +312,7 @@ function configurarAlergia() {
   btns.forEach(btn => {
     btn.addEventListener('click', () => {
       alergia = btn.dataset.alergia;
-      btns.forEach(b => {
-        b.classList.remove('bg-primary', 'text-white', 'border-primary');
-      });
+      btns.forEach(b => b.classList.remove('bg-primary', 'text-white', 'border-primary'));
       btn.classList.add('bg-primary', 'text-white', 'border-primary');
 
       if (alergia === 'si') {
