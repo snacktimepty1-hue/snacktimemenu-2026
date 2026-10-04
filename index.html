@@ -63,7 +63,7 @@ tailwind.config = {
   body { background-color: #fff8f2; color: #1d1b18; -webkit-font-smoothing: antialiased; }
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
   .botanical-card { background-color: #ffffff; border: 1px solid rgba(1, 45, 29, 0.1); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-  select, input, button { font-size: 16px !important; }
+  select, input, button, textarea { font-size: 16px !important; }
   button { touch-action: manipulation; }
   .day-card { border-left: 4px solid transparent; transition: all 0.3s ease; }
   .day-card.active { border-left-color: #2b694d; background-color: #f0fdf4; }
@@ -171,7 +171,7 @@ tailwind.config = {
 <script>
 // ============================================================
 const NUMERO_WHATSAPP = "50766646198";
-const URL_API = "PEGA_AQUI_TU_URL_DEL_APPS_SCRIPT";
+const URL_API = "https://script.google.com/macros/s/AKfycbw2KLZ8xLcc_N0VYFER4B6gIWgCvJKa6CLx1gYlwIa71tmbg7uwBMbMICiGFQJ5OFnhPw/exec";
 const CACHE_DURATION = 30 * 1000; // 30 segundos
 const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
@@ -202,7 +202,7 @@ async function fetchMenu() {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await fetch("https://script.google.com/macros/s/AKfycbw2KLZ8xLcc_N0VYFER4B6gIWgCvJKa6CLx1gYlwIa71tmbg7uwBMbMICiGFQJ5OFnhPw/exec", { signal: controller.signal, cache: 'no-store' });
+    const res = await fetch("https://script.google.com/macros/s/AKfycbw56rj_zl0jI5IquBxwQ26dbPZSVd5OoGJdYeuGms0kFndbI-uK_kg5hBtk3MuDBBiXWA/exec", { signal: controller.signal, cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     if (json.status !== 'success') throw new Error(json.message || 'Error del servidor');
@@ -239,10 +239,10 @@ function inicializarFormulario() {
     const diaId = norm(dia);
     selecciones[diaId] = { almuerzo: '', cena: '' };
 
-    const optsAlm = menu.almuerzos.map((p, i) =>
+    const optsAlm = menu.almuerzos.map(p =>
       `<option value="${esc(p.nombre)}">${esc(p.nombre)}${p.descripcion ? ' — ' + esc(p.descripcion) : ''}</option>`
     ).join('');
-    const optsCen = menu.cenas.map((p, i) =>
+    const optsCen = menu.cenas.map(p =>
       `<option value="${esc(p.nombre)}">${esc(p.nombre)}${p.descripcion ? ' — ' + esc(p.descripcion) : ''}</option>`
     ).join('');
 
