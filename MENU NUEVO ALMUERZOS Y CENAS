@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>Snacktimepty - Arma tu Menú Semanal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface-variant": "#e8e1db",
+        "secondary-fixed": "#b0f1cc",
+        "on-primary-fixed-variant": "#274e3d",
+        "on-secondary-container": "#327053",
+        "secondary-container": "#b0f1cc",
+        "outline": "#717973",
+        "primary-container": "#1b4332",
+        "surface-tint": "#3f6653",
+        "primary-fixed": "#c1ecd4",
+        "outline-variant": "#c1c8c2",
+        "surface-bright": "#fff8f2",
+        "error": "#ba1a1a",
+        "on-surface-variant": "#414844",
+        "surface-container-low": "#f9f2ec",
+        "on-surface": "#1d1b18",
+        "on-primary-container": "#86af99",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-highest": "#e8e1db",
+        "on-background": "#1d1b18",
+        "on-primary": "#ffffff",
+        "primary": "#012d1d",
+        "secondary-fixed-dim": "#94d4b1",
+        "error-container": "#ffdad6",
+        "background": "#fff8f2",
+        "on-secondary": "#ffffff",
+        "secondary": "#2b694d",
+        "on-primary-fixed": "#002114",
+        "tertiary": "#262620",
+        "surface-dim": "#dfd9d3",
+        "surface-container-high": "#ede7e1",
+        "surface": "#fff8f2",
+        "surface-container": "#f3ede7"
+      },
+      borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+      fontFamily: {
+        "label-md": ["Manrope"],
+        "headline-md": ["Manrope"],
+        "body-md": ["\"Source Sans 3\""],
+        "body-lg": ["\"Source Sans 3\""]
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { background-color: #fff8f2; color: #1d1b18; -webkit-font-smoothing: antialiased; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+  .botanical-card { background-color: #ffffff; border: 1px solid rgba(1, 45, 29, 0.1); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  select, input, button { font-size: 16px !important; }
+  button { touch-action: manipulation; }
+  .day-card { border-left: 4px solid transparent; transition: all 0.3s ease; }
+  .day-card.active { border-left-color: #2b694d; background-color: #f0fdf4; }
+  .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  .skeleton-select { height: 40px; width: 100%; margin-bottom: 8px; }
+</style>
+</head>
+<body class="font-body-md text-body-md min-h-screen flex flex-col">
+
+<header class="w-full top-0 sticky z-40 bg-surface/80 backdrop-blur-md px-4 h-16 flex items-center justify-center border-b border-outline-variant/30">
+  <div class="flex items-center gap-2">
+    <img alt="Snacktimepty Logo" class="h-8 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJfELIP2KZlMhze1lFWu8AFjGFxQc9uzVgiXvf9-5exYBVRhUPKMjPn-X5lcpjdjRC2DiSFwe7T5PQCqFzEPOUqAvlir6heAj0hOGX3ScrhfOMSSH8Foo8PLyGePoMZ2m_s_SXb1TrRMxsWMwSSX132u3DrpzHvHKCH9ywHk7FZAzmldoKjPqXekbYBjbz2nTZqMKnWR2KZ54V47wFlxAzwAyACPvPWX3-xymUrPPk0l2IDSRUbAvtTIM-8Ax-zposEFYesmExKtj9"/>
+    <span class="font-bold text-headline-md text-primary hidden sm:inline">Snacktimepty</span>
+  </div>
+</header>
+
+<main class="flex-grow w-full max-w-6xl mx-auto px-4 py-8">
+  <section class="mb-8 text-center md:text-left">
+    <h1 class="font-headline-md text-2xl md:text-4xl font-bold text-primary mb-2">Arma tu Menú Semanal</h1>
+    <p class="text-on-surface-variant max-w-xl">Elige tu almuerzo y cena para cada día. Puedes repetir platos. Los días que no completes no se incluirán.</p>
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-8 space-y-6">
+
+      <!-- Datos generales -->
+      <div class="botanical-card rounded-xl p-6">
+        <h2 class="font-label-md text-sm font-bold text-secondary uppercase tracking-widest mb-4 border-b border-outline-variant/20 pb-2">Información de Entrega</h2>
+
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-on-surface mb-1" for="ubicacion">📍 Ubicación de Entrega *</label>
+          <input class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" id="ubicacion" placeholder="Ej. Betania, Torre Global Calle 50..." required type="text"/>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-on-surface mb-2">⚠️ ¿Tiene alguna alergia alimentaria? *</label>
+          <div class="flex gap-2">
+            <button type="button" data-alergia="no" class="alergia-btn flex-1 py-2 px-4 rounded-lg border border-outline-variant font-medium text-sm transition-all">No</button>
+            <button type="button" data-alergia="si" class="alergia-btn flex-1 py-2 px-4 rounded-lg border border-outline-variant font-medium text-sm transition-all">Sí</button>
+          </div>
+          <input type="text" id="alergia-detalle" class="hidden w-full mt-2 px-4 py-2 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Especifique a qué es alérgico..."/>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-on-surface mb-1" for="comentarios">💬 Comentarios adicionales (opcional)</label>
+          <textarea id="comentarios" rows="2" class="w-full px-4 py-2 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none" placeholder="Ej. entregar antes de las 12pm, sin cebolla, etc."></textarea>
+        </div>
+      </div>
+
+      <!-- Días -->
+      <div class="botanical-card rounded-xl p-6">
+        <h2 class="font-label-md text-sm font-bold text-secondary uppercase tracking-widest mb-4 border-b border-outline-variant/20 pb-2">Selecciona tus Comidas</h2>
+        <div class="space-y-3" id="dias-container">
+          <div class="day-card rounded-xl border border-outline-variant/30 p-4">
+            <div class="skeleton" style="height:20px;width:80px;margin-bottom:12px;"></div>
+            <div class="skeleton skeleton-select"></div>
+            <div class="skeleton skeleton-select"></div>
+          </div>
+          <div class="day-card rounded-xl border border-outline-variant/30 p-4">
+            <div class="skeleton" style="height:20px;width:80px;margin-bottom:12px;"></div>
+            <div class="skeleton skeleton-select"></div>
+            <div class="skeleton skeleton-select"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 bg-surface-container-low rounded-xl border border-outline-variant/20 flex items-start gap-4">
+        <div class="p-2 bg-primary-container text-on-primary-container rounded-full shrink-0">
+          <span class="material-symbols-outlined">eco</span>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-primary">Compromiso Snacktime</h3>
+          <p class="text-sm text-on-surface-variant mt-1">Ingredientes locales y empaques 100% compostables para una nutrición consciente.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="lg:col-span-4">
+      <div class="botanical-card rounded-xl p-6 sticky top-24">
+        <h2 class="text-sm font-bold text-primary mb-4">Resumen de tu Pedido</h2>
+        <div id="resumen-pedido" class="space-y-2 text-sm text-on-surface-variant mb-4 max-h-[400px] overflow-y-auto"></div>
+        <div class="h-px bg-outline-variant/30 my-3"></div>
+        <button class="w-full flex items-center justify-center gap-2 bg-[#25D366] text-white py-3 px-4 rounded-lg font-medium text-sm hover:brightness-105 active:scale-[0.98] transition-all shadow-md" id="enviar-btn" type="button">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.539 2.016 2.126-.54c1.079.59 1.987.914 3.16.915 3.18 0 5.765-2.587 5.767-5.767 0-3.18-2.585-5.777-5.765-5.777zm3.387 8.192c-.159.43-.914.811-1.27.832-.36.02-.707.164-2.316-.464-1.61-.631-2.613-2.274-2.693-2.381-.08-.108-.656-.874-.656-1.665 0-.791.408-1.177.552-1.345.144-.17.315-.213.421-.213.106 0 .212.001.304.005.101.005.237-.038.37.284.133.327.456 1.114.495 1.194.039.081.065.174.011.285-.054.11-.081.18-.163.272-.081.092-.17.205-.243.275-.081.08-.166.167-.07.33.095.163.424.698.91 1.132.625.556 1.151.728 1.314.81.163.08.261.068.358-.043.098-.111.417-.484.529-.65.112-.165.223-.138.376-.08.152.058.97.457 1.137.54.167.083.277.124.318.196.04.072.04.417-.118.847z"/></svg>
+          Enviar por WhatsApp
+        </button>
+        <p class="text-center text-xs text-on-surface-variant/60 pt-1">Serás redirigido a WhatsApp para confirmar.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="mt-16 pb-8 border-t border-outline-variant/20 bg-surface-container-low pt-8">
+  <div class="max-w-4xl mx-auto px-4 text-center">
+    <div class="flex items-center justify-center gap-2 mb-2">
+      <img alt="Snacktimepty Logo" class="h-6 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJfELIP2KZlMhze1lFWu8AFjGFxQc9uzVgiXvf9-5exYBVRhUPKMjPn-X5lcpjdjRC2DiSFwe7T5PQCqFzEPOUqAvlir6heAj0hOGX3ScrhfOMSSH8Foo8PLyGePoMZ2m_s_SXb1TrRMxsWMwSSX132u3DrpzHvHKCH9ywHk7FZAzmldoKjPqXekbYBjbz2nTZqMKnWR2KZ54V47wFlxAzwAyACPvPWX3-xymUrPPk0l2IDSRUbAvtTIM-8Ax-zposEFYesmExKtj9"/>
+      <span class="text-primary opacity-50 font-semibold">Snacktimepty</span>
+    </div>
+    <p class="text-xs text-on-surface-variant">© 2024 Nutrición Consciente. Hecho con amor en Panamá.</p>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+const NUMERO_WHATSAPP = "50766646198";
+const URL_API = "PEGA_AQUI_TU_URL_DEL_APPS_SCRIPT";
+const CACHE_DURATION = 30 * 1000; // 30 segundos
+const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+
+let menu = { almuerzos: [], cenas: [] };
+let selecciones = {};
+let alergia = null; // 'si' | 'no' | null
+
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+const esc = s => String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+function guardarCache(data) {
+  try { localStorage.setItem('snacktime_menu_v2', JSON.stringify({ timestamp: Date.now(), data })); } catch(e){}
+}
+function obtenerCache() {
+  try {
+    const raw = localStorage.getItem('snacktime_menu_v2');
+    if (!raw) return null;
+    const c = JSON.parse(raw);
+    if (Date.now() - c.timestamp > CACHE_DURATION) { localStorage.removeItem('snacktime_menu_v2'); return null; }
+    return c.data;
+  } catch(e) { return null; }
+}
+
+async function fetchMenu() {
+  const cache = obtenerCache();
+  if (cache && cache.almuerzos && cache.cenas) return cache;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  try {
+    const res = await fetch(https://script.google.com/macros/s/AKfycbw2KLZ8xLcc_N0VYFER4B6gIWgCvJKa6CLx1gYlwIa71tmbg7uwBMbMICiGFQJ5OFnhPw/exec, { signal: controller.signal, cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (json.status !== 'success') throw new Error(json.message || 'Error del servidor');
+    guardarCache(json.data);
+    return json.data;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function cargarDatos() {
+  const container = document.getElementById('dias-container');
+  try {
+    menu = await fetchMenu();
+    if (!menu.almuerzos.length && !menu.cenas.length) {
+      container.innerHTML = '<p class="text-center text-red-600 p-4">El menú está vacío. Contacta a Snacktime.</p>';
+      return;
+    }
+    inicializarFormulario();
+  } catch (error) {
+    container.innerHTML = `<div class="p-4 text-center">
+      <p class="text-red-600 mb-2">No se pudo cargar el menú: ${esc(error.message)}</p>
+      <button onclick="cargarDatos()" class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium">Reintentar</button>
+    </div>`;
+  }
+}
+
+function inicializarFormulario() {
+  const container = document.getElementById('dias-container');
+  selecciones = {};
+
+  let html = '';
+  DIAS.forEach(dia => {
+    const diaId = norm(dia);
+    selecciones[diaId] = { almuerzo: '', cena: '' };
+
+    const optsAlm = menu.almuerzos.map((p, i) =>
+      `<option value="${esc(p.nombre)}">${esc(p.nombre)}${p.descripcion ? ' — ' + esc(p.descripcion) : ''}</option>`
+    ).join('');
+    const optsCen = menu.cenas.map((p, i) =>
+      `<option value="${esc(p.nombre)}">${esc(p.nombre)}${p.descripcion ? ' — ' + esc(p.descripcion) : ''}</option>`
+    ).join('');
+
+    html += `
+    <div class="day-card rounded-xl border border-outline-variant/30 p-4 active" id="dia-${diaId}">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="font-bold text-primary text-lg">${dia}</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="bg-surface-container-low rounded-lg p-3 border border-outline-variant/20">
+          <label class="text-xs font-bold text-secondary uppercase tracking-wider block mb-2">🍽️ Almuerzo</label>
+          <select class="w-full px-3 py-2 text-sm rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white"
+                  data-dia="${diaId}" data-comida="almuerzo">
+            <option value="">— Seleccionar —</option>
+            ${optsAlm}
+          </select>
+        </div>
+        <div class="bg-surface-container-low rounded-lg p-3 border border-outline-variant/20">
+          <label class="text-xs font-bold text-secondary uppercase tracking-wider block mb-2">🌙 Cena</label>
+          <select class="w-full px-3 py-2 text-sm rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white"
+                  data-dia="${diaId}" data-comida="cena">
+            <option value="">— Seleccionar —</option>
+            ${optsCen}
+          </select>
+        </div>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+
+  // Event delegation (evita inline onchange)
+  container.querySelectorAll('select').forEach(sel => {
+    sel.addEventListener('change', e => {
+      const { dia, comida } = e.target.dataset;
+      selecciones[dia][comida] = e.target.value;
+      actualizarResumen();
+    });
+  });
+
+  actualizarResumen();
+}
+
+// ---- Alergias ----
+function configurarAlergia() {
+  const btns = document.querySelectorAll('.alergia-btn');
+  const detalle = document.getElementById('alergia-detalle');
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      alergia = btn.dataset.alergia;
+      btns.forEach(b => {
+        b.classList.remove('bg-primary', 'text-white', 'border-primary');
+      });
+      btn.classList.add('bg-primary', 'text-white', 'border-primary');
+
+      if (alergia === 'si') {
+        detalle.classList.remove('hidden');
+        detalle.focus();
+      } else {
+        detalle.classList.add('hidden');
+        detalle.value = '';
+      }
+      actualizarResumen();
+    });
+  });
+}
+
+// ---- Resumen ----
+function actualizarResumen() {
+  const ubicacion = document.getElementById('ubicacion').value.trim();
+  const alergiaDet = document.getElementById('alergia-detalle').value.trim();
+  const comentarios = document.getElementById('comentarios').value.trim();
+  const cont = document.getElementById('resumen-pedido');
+
+  let html = '';
+
+  if (ubicacion) html += `<p class="font-semibold text-primary text-sm">📍 ${esc(ubicacion)}</p>`;
+
+  if (alergia === 'si') {
+    html += `<p class="font-semibold text-error text-sm">⚠️ Alergia: ${alergiaDet ? esc(alergiaDet) : '(especificar)'}</p>`;
+  } else if (alergia === 'no') {
+    html += `<p class="text-sm text-on-surface-variant">⚠️ Sin alergias</p>`;
+  }
+
+  if (comentarios) html += `<p class="text-xs text-on-surface-variant italic">💬 ${esc(comentarios)}</p>`;
+
+  let tieneSelecciones = false;
+  DIAS.forEach(dia => {
+    const diaId = norm(dia);
+    const s = selecciones[diaId];
+    if (!s) return;
+    if (s.almuerzo || s.cena) {
+      tieneSelecciones = true;
+      html += `<div class="mt-2 pt-2 border-t border-outline-variant/20">
+        <p class="font-bold text-primary text-sm">${dia}</p>`;
+      if (s.almuerzo) html += `<p class="text-xs text-on-surface-variant ml-2">🍽️ ${esc(s.almuerzo)}</p>`;
+      if (s.cena)     html += `<p class="text-xs text-on-surface-variant ml-2">🌙 ${esc(s.cena)}</p>`;
+      html += `</div>`;
+    }
+  });
+
+  if (!html) {
+    html = `<p class="text-center text-on-surface-variant/60 italic">Completa el formulario para ver tu resumen.</p>`;
+  } else if (!tieneSelecciones && !ubicacion && !alergia) {
+    html += `<p class="text-center text-on-surface-variant/60 italic mt-2">Aún no has elegido comidas.</p>`;
+  }
+
+  cont.innerHTML = html;
+}
+
+// ---- Validaciones ----
+function validar() {
+  const ubicacion = document.getElementById('ubicacion').value.trim();
+  if (!ubicacion) { alert('Por favor ingresa tu ubicación de entrega.'); return false; }
+
+  if (!alergia) { alert('Por favor indica si tienes alguna alergia alimentaria.'); return false; }
+  if (alergia === 'si') {
+    const det = document.getElementById('alergia-detalle').value.trim();
+    if (!det) { alert('Por favor especifica a qué eres alérgico.'); document.getElementById('alergia-detalle').focus(); return false; }
+  }
+
+  const tieneComida = Object.values(selecciones).some(s => s.almuerzo || s.cena);
+  if (!tieneComida) { alert('Selecciona al menos una comida para algún día.'); return false; }
+
+  return true;
+}
+
+// ---- Envío ----
+function enviarPedido() {
+  if (!validar()) return;
+
+  const ubicacion = document.getElementById('ubicacion').value.trim();
+  const alergiaDet = document.getElementById('alergia-detalle').value.trim();
+  const comentarios = document.getElementById('comentarios').value.trim();
+
+  let msg = `*PEDIDO SEMANAL - SNACKTIME*\n\n`;
+  msg += `📍 *Ubicación:* ${ubicacion}\n`;
+  if (alergia === 'si') msg += `⚠️ *Alergias:* ${alergiaDet}\n`;
+  else msg += `⚠️ *Alergias:* Ninguna\n`;
+  if (comentarios) msg += `💬 *Comentarios:* ${comentarios}\n`;
+  msg += `\n`;
+
+  DIAS.forEach(dia => {
+    const s = selecciones[norm(dia)];
+    if (!s || (!s.almuerzo && !s.cena)) return;
+    msg += `*${dia.toUpperCase()}*\n`;
+    if (s.almuerzo) msg += `🍽️ Almuerzo: ${s.almuerzo}\n`;
+    if (s.cena)     msg += `🌙 Cena: ${s.cena}\n`;
+    msg += `\n`;
+  });
+
+  const url = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+// ---- Init ----
+document.addEventListener('DOMContentLoaded', () => {
+  configurarAlergia();
+  cargarDatos();
+
+  document.getElementById('ubicacion').addEventListener('input', actualizarResumen);
+  document.getElementById('alergia-detalle').addEventListener('input', actualizarResumen);
+  document.getElementById('comentarios').addEventListener('input', actualizarResumen);
+
+  const btn = document.getElementById('enviar-btn');
+  btn.addEventListener('click', e => { e.preventDefault(); enviarPedido(); });
+});
+</script>
+</body>
+</html>
